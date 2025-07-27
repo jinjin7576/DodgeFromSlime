@@ -3,16 +3,24 @@ using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+public enum Rank
+{
+    F,
+    D,
+    C,
+    B,
+    A,
+    S,
+}
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
     Text surviveTimer;
-    Text highScore;
-    GameObject gameoverUI;
 
+    public Rank rank = Rank.F;
     public bool isGameover = false;
-    float score;
+    public float score;
 
     private void Awake()
     {
@@ -28,9 +36,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         surviveTimer = GameObject.Find("SurviveTimeText").GetComponent<Text>();
-        gameoverUI = GameObject.Find("GameOverUI");
-        highScore = GameObject.Find("HighScore").GetComponent<Text>();
-        gameoverUI.SetActive(false);
+
     }
 
  
@@ -41,28 +47,39 @@ public class GameManager : MonoBehaviour
             score += Time.deltaTime;
             surviveTimer.text = "생존 시간 : " + score.ToString("F0");
         }
-        if (Input.GetKeyDown(KeyCode.Space) && isGameover)
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-        else if (Input.GetKeyDown(KeyCode.Backspace) && isGameover)
-        {
-            SceneManager.LoadScene("Main");
-        }
     }
     public void GameOver()
     {
         isGameover = true;
-        gameoverUI.SetActive(true);
     
-        if (PlayerPrefs.GetFloat("HighScore") < score)
+        if (score < 5)
         {
-            highScore.text = "최고 생존 시간 : " + score.ToString("F0") ;
-            PlayerPrefs.SetFloat("HighScore", Mathf.RoundToInt(score));
+            rank = Rank.F;
+        }
+        else if (score >= 5 && score < 10)
+        {
+            rank = Rank.D;
+        }
+        else if (score >= 10 && score < 20)
+        {
+            rank = Rank.C;
+        }
+        else if (score >= 20 && score < 40)
+        {
+            rank = Rank.B;
+        }
+        else if (score >= 40 && score < 60)
+        {
+            rank = Rank.A;
         }
         else
         {
-            highScore.text = "최고 생존 시간 : " + PlayerPrefs.GetFloat("HighScore");
+            rank = Rank.S;
         }
+        Invoke("LoadGameOver", 1.5f);
+    }
+    void LoadGameOver()
+    {
+        SceneManager.LoadScene("GameOver");
     }
 }
